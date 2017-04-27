@@ -3,14 +3,18 @@ package net.digger.util;
 import java.util.concurrent.TimeUnit;
 
 public class Delay {
-	private static int NANO_PRECISION = setNanoPrecision();
+	public static final int NANO_PRECISION = setNanoPrecision();
 
 	/**
 	 * Pauses the given number of seconds.
 	 * @param sec
 	 */
 	public static void second(int sec) {
-		milli(sec * 1000);
+		try {
+			TimeUnit.SECONDS.sleep(sec);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
 	}
 	
 	/**
@@ -38,6 +42,7 @@ public class Delay {
 					// sleep for 1ms (or so)
 					TimeUnit.MILLISECONDS.sleep(1);
 				} else {
+					// sleep for no time (which still takes a bit of time)
 					TimeUnit.MILLISECONDS.sleep(0);
 				}
 				us = (int)((end - System.nanoTime()) / 1000);
@@ -48,14 +53,46 @@ public class Delay {
 		}
 	}
 	
+	/**
+	 * Pauses the given number of nanoseconds.
+	 * This is probably not worth calling for values less than
+	 * about double the value of NANO_PRECISION.
+	 * @param ns
+	 */
+	public static void nano(int ns) {
+		try {
+			long end = System.nanoTime() + ns;
+			while (ns > 0) {
+				if (ns > TimeUnit.MILLISECONDS.toNanos(2)) {
+					// if more than 2ms remaining...
+					// sleep for 1ms (or so)
+					TimeUnit.MILLISECONDS.sleep(1);
+				} else if (ns > TimeUnit.MICROSECONDS.toNanos(2)) {
+					// if more than 2us remaining...
+					// sleep for no time (which still takes a bit of time)
+					TimeUnit.MILLISECONDS.sleep(0);
+				} else {
+					// if 1us or less remaining...
+					// can't be efficient about it, just busy-wait until time is up
+				}
+				ns = (int)(end - System.nanoTime());
+			}
+			
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
+	}
+	
+	// This checks the time between System.nanoTime() updates.
+	// It varies, but I've personally never seen it go below 500ns.
 	private static int setNanoPrecision() {
 		long start = System.nanoTime();
 		long end = start;
 		while (end == start) {
 			end = System.nanoTime();
 		}
-		int nano = (int)Math.ceil((end - start) / 1000.0) * 1000;
-		System.out.println("NANO_PRECISION = (" + end + "-" + start + " = " + (end - start) + ") " + nano + " nanoseconds");
+		int nano = (int)(end - start);
+//		System.out.println("NANO_PRECISION = (" + end + "-" + start + " = " + (end - start) + ") " + nano + " nanoseconds");
 		return nano;
 	}
 }
