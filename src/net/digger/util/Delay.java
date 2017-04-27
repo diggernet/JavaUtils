@@ -6,6 +6,14 @@ public class Delay {
 	private static int NANO_PRECISION = setNanoPrecision();
 
 	/**
+	 * Pauses the given number of seconds.
+	 * @param sec
+	 */
+	public static void second(int sec) {
+		milli(sec * 1000);
+	}
+	
+	/**
 	 * Pauses the given number of milliseconds.
 	 * @param ms
 	 */
