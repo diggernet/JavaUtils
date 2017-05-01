@@ -3,7 +3,6 @@ package net.digger.util;
 import java.util.concurrent.TimeUnit;
 
 /**
- * net.digger.util.Delay
  * Copyright © 2017  David Walton
  * 
  * This program is free software: you can redistribute it and/or modify
