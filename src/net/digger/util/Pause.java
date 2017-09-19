@@ -20,10 +20,14 @@ import java.util.concurrent.TimeUnit;
  */
 
 /**
- * Utility for pausing a program briefly.
+ * Utility for pausing the current thread briefly.
+ * Does its best to handle sub-millisecond pauses.
+ * As of Java8 at least, TimeUnit.*.sleep() calls Thread.sleep(millis, nanos),
+ * which simply rounds up to millis + 1.
+ * 
  * @author walton
  */
-public class Delay {
+public class Pause {
 	public static final int NANO_PRECISION = setNanoPrecision();
 
 	/**
@@ -57,18 +61,19 @@ public class Delay {
 	public static void micro(int us) {
 		try {
 			long end = System.nanoTime() + (us * 1000);
-			while (us > 0) {
-				// if more than 2ms remaining...
-				if (us > TimeUnit.MILLISECONDS.toMicros(2)) {
-					// sleep for 1ms (or so)
-					TimeUnit.MILLISECONDS.sleep(1);
-				} else {
-					// sleep for no time (which still takes a bit of time)
-					TimeUnit.MILLISECONDS.sleep(0);
-				}
+			long ms = TimeUnit.MICROSECONDS.toMillis(us);
+			// if more than 1ms requested...
+			if (ms > 1) {
+				// sleep for 1ms less than that (or so)
+				TimeUnit.MILLISECONDS.sleep(ms - 1);
 				us = (int)((end - System.nanoTime()) / 1000);
 			}
-			
+			// while any us remaining...
+			while (us > 0) {
+				// sleep for no time (which still takes a bit of time)
+				TimeUnit.MILLISECONDS.sleep(0);
+				us = (int)((end - System.nanoTime()) / 1000);
+			}
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		}
@@ -83,29 +88,32 @@ public class Delay {
 	public static void nano(int ns) {
 		try {
 			long end = System.nanoTime() + ns;
+			long ms = TimeUnit.NANOSECONDS.toMillis(ns);
+			// if more than 1ms requested...
+			if (ms > 1) {
+				// sleep for 1ms less than that (or so)
+				TimeUnit.MILLISECONDS.sleep(ms - 1);
+				ns = (int)(end - System.nanoTime());
+			}
+			// while any ns remaining...
 			while (ns > 0) {
-				if (ns > TimeUnit.MILLISECONDS.toNanos(2)) {
-					// if more than 2ms remaining...
-					// sleep for 1ms (or so)
-					TimeUnit.MILLISECONDS.sleep(1);
-				} else if (ns > TimeUnit.MICROSECONDS.toNanos(2)) {
-					// if more than 2us remaining...
+				if (ns > TimeUnit.MICROSECONDS.toNanos(1)) {
+					// if more than 1us remaining...
 					// sleep for no time (which still takes a bit of time)
 					TimeUnit.MILLISECONDS.sleep(0);
 				} else {
-					// if 1us or less remaining...
+					// if less than 2us remaining...
 					// can't be efficient about it, just busy-wait until time is up
 				}
 				ns = (int)(end - System.nanoTime());
 			}
-			
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		}
 	}
 	
-	// This checks the time between System.nanoTime() updates.
-	// It varies, but I've personally never seen it go below 500ns.
+	// This checks the approximate time between System.nanoTime() updates.
+	// The value varies, but I've personally never yet seen it go below 500ns.
 	private static int setNanoPrecision() {
 		long start = System.nanoTime();
 		long end = start;
