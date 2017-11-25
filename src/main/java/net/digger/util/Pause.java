@@ -1,7 +1,3 @@
-package net.digger.util;
-
-import java.util.concurrent.TimeUnit;
-
 /**
  * Copyright © 2017  David Walton
  * 
@@ -18,6 +14,9 @@ import java.util.concurrent.TimeUnit;
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package net.digger.util;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Utility for pausing the current thread briefly.
