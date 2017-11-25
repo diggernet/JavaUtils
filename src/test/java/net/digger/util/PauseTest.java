@@ -20,28 +20,30 @@ public class PauseTest {
 	
 	@Test
 	public void testPauseSeconds() {
-		long start = System.nanoTime();
-		Pause.second(5);
-		long duration = System.nanoTime() - start;
+		long duration = Timer.time(() -> {
+			Pause.second(5);
+		});
 		System.out.printf("Second duration: %f\n", duration / 1000000000.0);
 		assertThat(duration, allOf(greaterThan(4990000000L), lessThan(5010000000L)));
 	}
 
 	@Test
 	public void testPauseMillis() {
-		long start = System.nanoTime();
-		Pause.milli(5);
-		Pause.milli(5);
-		Pause.milli(5);
-		Pause.milli(5);
-		Pause.milli(5);
-		long duration = (System.nanoTime() - start) / 5;
+		long duration = Timer.time(() -> {
+			Pause.milli(5);
+			Pause.milli(5);
+			Pause.milli(5);
+			Pause.milli(5);
+			Pause.milli(5);
+		});
+		duration /= 5;
 		System.out.printf("Milli duration: %f\n", duration / 1000000.0);
 		assertThat(duration, allOf(greaterThan(4990000L), lessThan(5010000L)));
 	}
 
 	@Test
 	public void testPauseMicros() {
+		// Timer.time() adds too much overhead for timing microseconds.
 		long start = System.nanoTime();
 		Pause.micro(50);
 		Pause.micro(50);
@@ -50,11 +52,12 @@ public class PauseTest {
 		Pause.micro(50);
 		long duration = (System.nanoTime() - start) / 5;
 		System.out.printf("Micro duration: %f\n", duration / 1000.0);
-		assertThat(duration, allOf(greaterThan(49000L), lessThan(51000L)));
+		assertThat(duration, allOf(greaterThan(49000L), lessThan(52000L)));
 	}
 
 	@Test
 	public void testPauseNanos() {
+		// Timer.time() adds too much overhead for timing nanoseconds.
 		long start = System.nanoTime();
 		Pause.nano(5000);
 		Pause.nano(5000);

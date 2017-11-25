@@ -1,6 +1,7 @@
 # JavaUtils
-JavaUtils is a collection of small utility classes.  It includes a tool to
-pause a thread with finer control than the standard tools.
+JavaUtils is a collection of small utility classes.  It includes tools to
+pause a thread with finer control than the standard tools, and to measure
+elapsed time.
 
 
 ## Pause
@@ -34,6 +35,15 @@ tens of microseconds.  Your results may vary.
 
 		Pause.nano(nanoseconds);
 
+
+## Timer
+A simple little tool to quickly check the elapsed time for a block of code.
+
+### Usage
+
+		long elapsed = Timer.time(() -> {
+			// your code here
+		});
 
 ## License
 These utilities are provided under the terms of the GNU LGPLv3.
