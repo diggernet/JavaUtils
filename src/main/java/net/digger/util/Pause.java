@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Utility for pausing the current thread briefly.
+ * <p>
  * Does its best to handle sub-millisecond pauses.
  * As of Java8 at least, TimeUnit.*.sleep() calls Thread.sleep(millis, nanos),
  * which simply rounds up to millis + 1.
@@ -32,7 +33,8 @@ public class Pause {
 
 	/**
 	 * Pauses the given number of seconds.
-	 * @param sec
+	 * 
+	 * @param sec Number of seconds to pause.
 	 */
 	public static void second(int sec) {
 		try {
@@ -44,19 +46,19 @@ public class Pause {
 	
 	/**
 	 * Pauses the given number of milliseconds.
-	 * @param ms
+	 * 
+	 * @param ms Number of milliseconds to pause.
 	 */
 	public static void milli(int ms) {
-		try {
-			TimeUnit.MILLISECONDS.sleep(ms);
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-		}
+		// Since TimeUnit.MILLISECONDS.sleep() tends to sleep rather longer
+		// than it should, we'll use the more accurate micro().
+		micro(ms * 1000);
 	}
 	
 	/**
 	 * Pauses the given number of microseconds.
-	 * @param us
+	 * 
+	 * @param us Number of microseconds to pause.
 	 */
 	public static void micro(int us) {
 		try {
@@ -82,8 +84,9 @@ public class Pause {
 	/**
 	 * Pauses the given number of nanoseconds.
 	 * This is probably not worth calling for values less than
-	 * about double the value of NANO_PRECISION.
-	 * @param ns
+	 * several times the value of NANO_PRECISION.
+	 * 
+	 * @param ns Number of nanoseconds to pause.
 	 */
 	public static void nano(int ns) {
 		try {
