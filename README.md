@@ -4,6 +4,15 @@ pause a thread with finer control than the standard tools, and to measure
 elapsed time.
 
 
+## Maven configuration
+
+		<dependency>
+			<groupId>net.digger</groupId>
+			<artifactId>utils</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+
+
 ## Pause
 Pause is a tool to pause a thread for a period of time, with finer control
 than the standard tools.  For example, you could call
